@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Obras em Portugal</title>
+  <meta name="description" content="Licenciamento e conclusão de obras de construção e renovação por concelho e distrito.">
+  <script>
+    // Apply a saved theme before first paint to avoid a flash.
+    try { var th = localStorage.getItem("theme"); if (th === "light" || th === "dark") document.documentElement.dataset.theme = th; } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1 data-i18n="title">Obras em Portugal</h1>
+      <p class="sub" data-i18n="subtitle"></p>
+    </div>
+    <div class="top-controls">
+      <div class="seg seg-sm" role="radiogroup" data-i18n-aria="langAria">
+        <button type="button" role="radio" data-lang="pt" aria-checked="true" lang="pt">PT</button>
+        <button type="button" role="radio" data-lang="en" aria-checked="false" lang="en">EN</button>
+      </div>
+      <div class="seg seg-sm" role="radiogroup" data-i18n-aria="themeAria">
+        <button type="button" role="radio" data-theme-btn="light" aria-checked="true"><span aria-hidden="true">☀</span> <span data-i18n="light">Claro</span></button>
+        <button type="button" role="radio" data-theme-btn="dark" aria-checked="false"><span aria-hidden="true">☾</span> <span data-i18n="dark">Escuro</span></button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="filters" data-i18n-aria="filtersAria">
+    <label><span data-i18n="year">Ano</span>
+      <select id="f-year"></select>
+    </label>
+    <label><span data-i18n="mapMetric">Indicador no mapa</span>
+      <select id="f-metric"></select>
+    </label>
+    <label><span data-i18n="units">Unidades</span>
+      <select id="f-units"></select>
+    </label>
+    <div class="seg" role="radiogroup" data-i18n-aria="levelAria">
+      <button type="button" role="radio" data-level="mun" aria-checked="true" data-i18n="levelMun">Concelhos</button>
+      <button type="button" role="radio" data-level="dist" aria-checked="false" data-i18n="levelDist">Distritos</button>
+    </div>
+    <label class="search"><span data-i18n="search">Procurar concelho</span>
+      <input id="f-search" list="muni-list" autocomplete="off">
+      <datalist id="muni-list"></datalist>
+    </label>
+  </nav>
+
+  <main class="layout">
+    <section class="card map-card">
+      <div class="map-head">
+        <h2 id="map-title">—</h2>
+        <p id="map-sub" class="muted"></p>
+      </div>
+      <div id="map" class="map"></div>
+      <div id="map-legend" class="legend-scale"></div>
+      <p class="muted small"><span class="ring-key" aria-hidden="true"></span> <span data-i18n="ringNote"></span></p>
+    </section>
+
+    <section class="detail" aria-live="polite">
+      <div class="detail-head">
+        <div>
+          <p class="eyebrow" id="sel-kind"></p>
+          <h2 id="sel-name">Portugal</h2>
+        </div>
+        <button id="sel-reset" class="ghost" type="button" data-i18n="back" hidden>← Portugal</button>
+      </div>
+
+      <div class="tiles" id="tiles"></div>
+
+      <article class="card chart-card" id="c-types"></article>
+      <article class="card chart-card" id="c-licvscomp"></article>
+      <article class="card chart-card" id="c-use"></article>
+      <article class="card chart-card" id="c-dwell"></article>
+      <div class="pair">
+        <article class="card chart-card" id="c-pop"></article>
+        <article class="card chart-card" id="c-stock"></article>
+      </div>
+
+      <div id="council"></div>
+      <article class="card" id="parishes" hidden></article>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <h2 id="sources-title"></h2>
+    <div id="sources"></div>
+  </footer>
+
+  <div id="tooltip" class="tooltip" role="status" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
