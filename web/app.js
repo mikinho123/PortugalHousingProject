@@ -68,6 +68,9 @@
       caop: "Limites administrativos: CAOP2025, Direção-Geral do Território.",
       notes: "Notas: “renovação” = ampliação + alteração + reconstrução. Valores do INE contam edifícios; dados municipais contam processos. Os indeferimentos e as mudanças de uso não são publicados a nível nacional. Taxas por habitante usam a população residente a 31 de dezembro; taxas por alojamento/edifício usam o parque habitacional do mesmo ano (ou o último disponível).",
       district: "Distrito", councilData: "Dados municipais", yes: "sim", loadErr: "Erro a carregar os dados: ",
+      licence: "Dados: INE, DGT (CAOP2025) e flatin.pt, sob licença CC BY 4.0 — agregados, recombinados e simplificados por este projeto. Dados municipais: câmaras municipais de Matosinhos, Paredes e Lousã (contagens agregadas; nenhum dado pessoal é usado).",
+      caveatLabel: "Dados incompletos", caveatTip: "dados incompletos neste ano", caveatSrc: "Nota do INE nos indicadores",
+      caveatDist: "Este total inclui {m}; ",
     },
     en: {
       title: "Building works in Portugal",
@@ -131,6 +134,9 @@
       caop: "Administrative boundaries: CAOP2025, Direção-Geral do Território.",
       notes: "Notes: “renovation” = enlargement + alteration + reconstruction. INE figures count buildings; council data count processes. Refusals and changes of use are not published nationally. Per-resident rates use the resident population at 31 December; per-dwelling/building rates use the housing stock of the same year (or the latest available).",
       district: "District", councilData: "Council data", yes: "yes", loadErr: "Error loading data: ",
+      licence: "Data: INE, DGT (CAOP2025) and flatin.pt, under CC BY 4.0 — aggregated, recombined and simplified by this project. Council data: Matosinhos, Paredes and Lousã municipal councils (aggregated counts; no personal data is used).",
+      caveatLabel: "Incomplete data", caveatTip: "incomplete data this year", caveatSrc: "INE footnote on indicators",
+      caveatDist: "This total includes {m}; ",
     },
   };
   // Council use categories come from the source in Portuguese; translate the common ones.
@@ -244,6 +250,27 @@
     return seriesOfDistrict(sel.id);
   }
   const carriedFrom = () => (state.norm === "dw" ? INE.stock_carried_from.stock_dw : state.norm === "bld" ? INE.stock_carried_from.stock_bld : null);
+  // Known data gaps (from INE footnotes) affecting a set of municipality codes.
+  function caveatsFor(codes) {
+    const set = new Set(codes);
+    return (INE.caveats || []).map((c) => ({ ...c, hit: c.dtmn.filter((d) => set.has(d)) })).filter((c) => c.hit.length);
+  }
+  const selCodes = (sel) => (!sel ? [] : sel.type === "mun" ? [sel.id] : codesOfDistrict(sel.id)); // national total: effect is <2%
+  const names = (codes) => codes.map((d) => INE.municipios[d].nome).join(state.lang === "en" ? " and " : " e ");
+  function renderCaveats() {
+    const host = $("#caveats"); host.replaceChildren();
+    for (const c of caveatsFor(selCodes(state.sel))) {
+      const box = el("div", { class: "caveat", role: "note" });
+      const head = el("div", { class: "caveat-head" });
+      head.append(el("span", { class: "caveat-icon", "aria-hidden": "true" }, "!"), el("b", {}, `${t("caveatLabel")} · ${c.from}–${c.to}`));
+      const txt = (state.sel.type === "dist" ? t("caveatDist", { m: names(c.hit) }) : "") + c[state.lang].replace("{m}", names(c.hit));
+      const p = el("p", {}, txt + " ");
+      p.append(el("span", { class: "muted" }, `${t("caveatSrc")} ${c.source.join(", ")}.`));
+      box.append(head, p);
+      host.append(box);
+    }
+  }
+
   function normNote() {
     if (state.norm === "abs") return "";
     let s = t("normNote", { u: t(unit().noun) });
@@ -338,6 +365,7 @@
     if (kind === "mun") {
       rows.push({ label: t("district"), value: INE.municipios[f.properties.dtmn].distrito });
       if (MUN.concelhos[f.properties.dtmn]) rows.push({ label: t("councilData"), value: t("yes") });
+      if (caveatsFor([f.properties.dtmn]).some((c) => state.year >= c.from && state.year <= c.to)) rows.push({ label: "⚠", value: t("caveatTip") });
     }
     showTip(e, `${kind === "mun" ? f.properties.nome : f.properties.code} · ${state.year}`, rows);
   }
@@ -633,6 +661,7 @@
     $("#sel-kind").textContent = !sel ? t("kindCountry") : sel.type === "mun" ? t("kindMun", { d: INE.municipios[sel.id].distrito }) : t("kindDist");
     $("#sel-name").textContent = !sel ? "Portugal" : sel.type === "mun" ? INE.municipios[sel.id].nome : sel.id;
     $("#sel-reset").hidden = !sel;
+    renderCaveats();
 
     // tiles
     const tiles = $("#tiles"); tiles.replaceChildren();
@@ -889,7 +918,10 @@
       const l = el("li"); l.append(el("a", { href: c.url, target: "_blank", rel: "noopener" }, c.fonte), document.createTextNode(` (${t("fetched")} ${c.obtido}).`)); ul.append(l);
     }
     ul.append(el("li", {}, t("caop")));
-    host.append(ul, el("p", {}, t("notes")));
+    const lic = el("p", {});
+    lic.append(document.createTextNode(t("licence") + " "),
+      el("a", { href: "https://creativecommons.org/licenses/by/4.0/", target: "_blank", rel: "noopener license" }, "CC BY 4.0"));
+    host.append(ul, el("p", {}, t("notes")), lic);
   }
 
   // ------------------------------------------------------------ chrome: language, theme, controls

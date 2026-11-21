@@ -25,6 +25,24 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
 .venv/Scripts/python scripts/build_data.py            # -> web/data/*.json
 ```
 
+Or run everything at once, with safety checks that restore the previous data if anything looks wrong:
+
+```sh
+.venv/Scripts/python scripts/refresh.py
+```
+
+## Hosting and automatic refresh
+
+`.github/workflows/site.yml` publishes `web/` to **GitHub Pages** on every push to `main`. On the 5th of every month it also
+refreshes the data, commits `web/data` if anything changed, and redeploys. You can trigger it by hand from the
+**Actions** tab with **Run workflow**. One-time setup: **Settings → Pages → Source: GitHub Actions**.
+
+## Licence of the data
+
+INE, DGT (CAOP2025) and flatin.pt data are published under **CC BY 4.0**. This project aggregates, recombines and
+simplifies them, and credits them in the page footer. The council layers (Matosinhos, Paredes, Lousã) state no licence.
+Only aggregated yearly counts are published from them, and permission is being requested.
+
 ## Sources and coverage
 
 | What | Source | Coverage |

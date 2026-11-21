@@ -66,6 +66,21 @@ DENOMINATORS = {
 }
 
 
+# Known gaps. INE footnotes (completed works 0008330/0008320, housing stock 0000083/0000084) say responses were
+# incomplete for these municipalities/years; the licensing series (same survey) shows the same gap for Lisboa/Seia
+# 2002-2005 (near-zero values followed by a jump in 2006) although its own metadata carries no footnote.
+CAVEATS = [
+    {"dtmn": ["1106", "0912"], "from": 2002, "to": 2005, "series": ["lic", "comp", "stock"],
+     "pt": "O INE não obteve todas as respostas de {m} em 2002–2005: os valores de licenciamento, conclusões e parque habitacional destes anos estão subavaliados (o licenciamento aparece quase a zero em 2003–2005).",
+     "en": "INE did not receive all survey responses from {m} for 2002–2005: licensing, completion and housing-stock values for those years are undercounted (licensing shows as almost zero in 2003–2005).",
+     "source": ["0008330", "0008320", "0000083", "0000084"]},
+    {"dtmn": ["1115"], "from": 2011, "to": 2017, "series": ["comp", "stock"],
+     "pt": "O INE não obteve todas as respostas de {m} em 2011–2017: as conclusões de obras e o parque habitacional destes anos estão subavaliados.",
+     "en": "INE did not receive all survey responses from {m} for 2011–2017: completions and housing-stock values for those years are undercounted.",
+     "source": ["0008330", "0008320", "0014136", "0014137"]},
+]
+
+
 def num(v):
     try:
         return int(float(v))
@@ -136,6 +151,7 @@ def build_ine(names):
                for code, (meta, _) in cache.items()}
     out = {"years": all_years, "series": list(INE_SERIES) + list(DENOMINATORS), "sources": sources,
            "stock_carried_from": carried,
+           "caveats": CAVEATS,
            "series_source": {**{k: v[0] for k, v in INE_SERIES.items()}, **{k: [c for c, _, _ in v[0]] for k, v in DENOMINATORS.items()}},
            "municipios": {d: {"nome": names[d]["nome"], "distrito": names[d]["distrito"], **munis[d]} for d in sorted(munis)}}
     (WEB / "ine.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

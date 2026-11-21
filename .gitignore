@@ -9,3 +9,6 @@ data/raw/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Private project handbook (local notes, drafts)
+PROJECT_GUIDE.html
